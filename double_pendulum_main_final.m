@@ -171,10 +171,14 @@ end
 
 
 %%%% This function defines the kinematic constraint imposed on q2, as a
-%%%% fucntion of q1 using a suitable Rotation Matrix, R
+%%%% function of q1 using a suitable Rotation Matrix, R
 
 function [q2d,w2d,R]=double_pendulum_constraints(q1,w1)
-R = [1 0 0;0 1 0;0 0 -1];  %% virtual constraint
+% R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
+
+%%%% Testing other valid rotation matrices  %%%%%
+R = Rx((180-0*20)*(pi/180))*Ry((-180+0*20)*(pi/180));
+
 dq1 = cross2(w1,q1);
 q2d = (R*q1);
 dq2d = R*dq1; 
