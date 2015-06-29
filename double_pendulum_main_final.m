@@ -119,7 +119,8 @@ end
 
 function [value,isterminal,direction] = events(t,x,data)
 q1=x(1:3);
-value = asin(q1(1)/cos(asin(q1(2))))+data.theta;
+current_theta = -asin(q1(1));
+value = current_theta + data.theta;
 isterminal=1;
 direction=0;
 end
@@ -176,8 +177,10 @@ end
 function [q2d,w2d,R]=double_pendulum_constraints(q1,w1)
 % R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
 
+theta = -asin(q1(1)); %% current pitch angle
+phi = atan2(-q1(2),q1(3)); %% current roll angle
 %%%% Testing other valid rotation matrices  %%%%%
-R = Rx((180-0*20)*(pi/180))*Ry((-180+0*20)*(pi/180));
+R = Rx((180-2*phi)*(pi/180))*Ry((-180+2*theta)*(pi/180));
 
 dq1 = cross2(w1,q1);
 q2d = (R*q1);
