@@ -16,7 +16,7 @@ data.theta = -20*(pi/180); % Pitch := Rotation about Y-axis; Start with some neg
 data.phi = -10*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
 
 %%%%%%%%%% Defining Initial Conditions %%%%%%%%%
-q10 = Rx(data.theta)*Ry(data.phi)*data.e3;
+q10 = Rx(data.phi)*Ry(data.theta)*data.e3;
 w10 = [0 2.5 0]';
 
 %%%% applying a transport map on w10 w.r.t. q10, to maintain normality condition
@@ -177,18 +177,19 @@ end
 function [q2d,w2d,R]=double_pendulum_constraints(q1,w1)
 
 
-% R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
-theta = -asin(q1(1)); %% current pitch angle
-phi = atan2(-q1(2),q1(3)); %% current roll angle
-%%%% Testing other valid rotation matrices  %%%%%
-R = Rx((180-2*phi)*(pi/180))*Ry((-180+2*theta)*(pi/180));
+% % R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
+% theta = -asin(q1(1)); %% current pitch angle
+% phi = atan2(-q1(2),q1(3)); %% current roll angle
+% %%%% Testing other valid rotation matrices  %%%%%
+% R = Rx((180-2*phi)*(pi/180))*Ry((-180+2*theta)*(pi/180));
 
 %%%% using Angle-Axis Representation %%%
 e3 = [0 0 1];
 r = cross2(q1,e3)/norm(cross2(q1,e3));
 theta1 = atan2(norm(cross2(q1,e3)),dot(q1,e3));
 theta = pi - 2*theta1;
-R = cos(theta)
+R = eye(3) + sin(theta)*hat(r) + (1-cos(theta))*hat(r)^2;
+
 
 
 dq1 = cross2(w1,q1);

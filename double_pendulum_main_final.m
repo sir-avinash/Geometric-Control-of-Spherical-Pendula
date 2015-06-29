@@ -13,10 +13,10 @@ data.e3 = [0 0 1]';
 data.m = 1;
 data.l = 0.2;
 data.theta = -20*(pi/180); % Pitch := Rotation about Y-axis; Start with some negative deflection
-data.phi = -10*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
+data.phi = 0*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
 
 %%%%%%%%%% Defining Initial Conditions %%%%%%%%%
-q10 = Rx(data.theta)*Ry(data.phi)*data.e3;
+q10 = Rx(data.phi)*Ry(data.theta)*data.e3;
 w10 = [0 2.5 0]';
 
 %%%% applying a transport map on w10 w.r.t. q10, to maintain normality condition
