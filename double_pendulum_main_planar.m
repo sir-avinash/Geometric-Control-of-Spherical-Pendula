@@ -1,4 +1,4 @@
-function double_pendulum_main_final
+function double_pendulum_main_planar
 
 %%% In this file, a PD controller is developed on S^2 x S^2 to 
 %%% enable an under-actuated double spherical pendulum (pendubot) to track
@@ -13,7 +13,7 @@ data.e3 = [0 0 1]';
 data.m = 1;
 data.l = 0.2;
 data.theta = -20*(pi/180); % Pitch := Rotation about Y-axis; Start with some negative deflection
-data.phi = -10*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
+data.phi = -0*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
 
 %%%%%%%%%% Defining Initial Conditions %%%%%%%%%
 q10 = Rx(data.theta)*Ry(data.phi)*data.e3;
