@@ -1,4 +1,4 @@
-function double_pendulum_main_final
+function double_pendulum_main_final2
 
 %%% In this file, a PD controller is developed on S^2 x S^2 to 
 %%% enable an under-actuated double spherical pendulum (pendubot) to track
@@ -13,7 +13,7 @@ data.e3 = [0 0 1]';
 data.m = 1;
 data.l = 0.2;
 data.theta = -20*(pi/180); % Pitch := Rotation about Y-axis; Start with some negative deflection
-data.phi = -10*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
+data.phi = -0*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
 
 %%%%%%%%%% Defining Initial Conditions %%%%%%%%%
 q10 = Rx(data.phi)*Ry(data.theta)*data.e3;
@@ -29,7 +29,7 @@ x0 = [q10;q20;w10;w20];
 
 %%%%%%%%% Simulating the Dynamics %%%%%%%%%%%%%%%
 
-options = odeset('Events',@events,'RelTol',1e-9,'AbsTol',1e-12); 
+options = odeset('RelTol',1e-9,'AbsTol',1e-12); 
 
 [T,X]=ode45(@double_pendulum_dynamics,[0 1],x0,options,data);
 Fs=120;   %% sampling rate. 
@@ -51,7 +51,7 @@ figure
     hplot2 = plot3(0,0,0,'b-x');
     set(hplot2,'XDATA',[0,q1(1),NaN,q1(1),q1(1)+q2d(1),NaN],'YDATA',[0,q1(2),NaN,q1(2),q1(2)+q2d(2),NaN],'ZDATA',[0,q1(3),NaN,q1(3),q1(3)+q2d(3),NaN]); 
     hold off 
-    view(-45,45)
+    view(-45,30)
     axis([-2 2 -2 2 -2 2])
 
     drawnow
@@ -115,15 +115,14 @@ dx =[dq1;dq2;dw];
 end
 
 
-%%%% ODE Events Function 
-
-function [value,isterminal,direction] = events(t,x,data)
-q1=x(1:3);
-current_theta = -asin(q1(1));
-value = current_theta + data.theta;
-isterminal=1;
-direction=0;
-end
+% %%%% ODE Events Function 
+% 
+% function [value,isterminal,direction] = events(t,x,data)
+% q1=x(1:3);
+% value = asin(q1(1)/cos(asin(q1(2))))+data.theta;
+% isterminal=1;
+% direction=0;
+% end
 
 
 %%%% This is the Controller Function. It can be used to generate inputs and
@@ -175,21 +174,11 @@ end
 %%%% function of q1 using a suitable Rotation Matrix, R
 
 function [q2d,w2d,R]=double_pendulum_constraints(q1,w1)
+% R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
 
-
-% % R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
-% theta = -asin(q1(1)); %% current pitch angle
-% phi = atan2(-q1(2),q1(3)); %% current roll angle
-% %%%% Testing other valid rotation matrices  %%%%%
-% R = Rx((180-2*phi)*(pi/180))*Ry((-180+2*theta)*(pi/180));
-
-%%%% using Angle-Axis Representation %%%
-e3 = [0 0 1];
-r = cross2(q1,e3)/norm(cross2(q1,e3));
-theta1 = atan2(norm(cross2(q1,e3)),dot(q1,e3));
-theta = pi - 2*theta1;
-R = eye(3) + sin(theta)*hat(r) + (1-cos(theta))*hat(r)^2;
-
+%%%% Testing other valid rotation matrices  %%%%%
+ theta = atan2(q1(1),q1(3))*(180/pi);
+ R = Ry(-pi/2.0);
 
 
 dq1 = cross2(w1,q1);
@@ -198,6 +187,7 @@ dq2d = R*dq1;
 w2d = cross2(q2d,dq2d);
 % w2d = R*w1;
 end
+
 
 
 

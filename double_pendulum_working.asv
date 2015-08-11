@@ -1,4 +1,5 @@
-function double_pendulum_main_planar
+
+function double_pendulum_working
 
 %%% In this file, a PD controller is developed on S^2 x S^2 to 
 %%% enable an under-actuated double spherical pendulum (pendubot) to track
@@ -12,15 +13,15 @@ data.g = 9.8;
 data.e3 = [0 0 1]';
 data.m = 1;
 data.l = 0.2;
-data.theta = -10*(pi/180); % Pitch := Rotation about Y-axis; Start with some negative deflection
+data.theta = -20*(pi/180); % Pitch := Rotation about Y-axis; Start with some negative deflection
 data.phi = 0*(pi/180); % Roll := Rotation about X-axis; Start with some positive displacement
 
 %%%%%%%%%% Defining Initial Conditions %%%%%%%%%
 q10 = Rx(data.phi)*Ry(data.theta)*data.e3;
-w10 = [0 -1.5 0]';
+w10 = [0 2.5 0]';
 
-% %%%% applying a transport map on w10 w.r.t. q10, to maintain normality condition
-% w10 = trans_map(q10,w10); 
+%%%% applying a transport map on w10 w.r.t. q10, to maintain normality condition
+w10 = trans_map(q10,w10); 
 
 %%%% Choose by how much you wish to rotate q2 away from q2d. Default is q2d. 
 perturb_q2 = Rx(0*pi/180)*Ry(0*pi/180);  
@@ -29,7 +30,8 @@ x0 = [q10;q20;w10;w20];
 
 %%%%%%%%% Simulating the Dynamics %%%%%%%%%%%%%%%
 
-options = odeset('Events',@events,'RelTol',1e-9,'AbsTol',1e-12); 
+% options = odeset('Events',@events,'RelTol',1e-9,'AbsTol',1e-12); 
+options = odeset('RelTol',1e-9,'AbsTol',1e-12); 
 
 [T,X]=ode45(@double_pendulum_dynamics,[0 1],x0,options,data);
 Fs=120;   %% sampling rate. 
@@ -51,7 +53,7 @@ figure
     hplot2 = plot3(0,0,0,'b-x');
     set(hplot2,'XDATA',[0,q1(1),NaN,q1(1),q1(1)+q2d(1),NaN],'YDATA',[0,q1(2),NaN,q1(2),q1(2)+q2d(2),NaN],'ZDATA',[0,q1(3),NaN,q1(3),q1(3)+q2d(3),NaN]); 
     hold off 
-    view(-45,30)
+    view(-45,45)
     axis([-2 2 -2 2 -2 2])
 
     drawnow
@@ -117,13 +119,12 @@ end
 
 %%%% ODE Events Function 
 
-function [value,isterminal,direction] = events(t,x,data)
-q1=x(1:3);
-current_theta = -asin(q1(1));
-value = current_theta + data.theta;
-isterminal=1;
-direction=0;
-end
+% function [value,isterminal,direction] = events(t,x,data)
+% q1=x(1:3);
+% value = asin(q1(1)/cos(asin(q1(2))))+data.theta;
+% isterminal=1;
+% direction=0;
+% end
 
 
 %%%% This is the Controller Function. It can be used to generate inputs and
@@ -175,18 +176,20 @@ end
 %%%% function of q1 using a suitable Rotation Matrix, R
 
 function [q2d,w2d,R]=double_pendulum_constraints(q1,w1)
+% R = [1 0 0;0 1 0;0 0 -1];  %% Its not valid. Its an improper rotation
 
-%% Planar Euler Angle - About Y-axis - Only Pitching
-theta = atan2(-q1(1),q1(3));
-% R = Ry(-pi+2*theta);
-R = Rx(-pi/20)*Ry(pi/10);
+%%%% Testing other valid rotation matrices  %%%%%
+theta = 
+R = Ry((-180+1*20)*(pi/180));
 
 dq1 = cross2(w1,q1);
 q2d = (R*q1);
 dq2d = R*dq1; 
 w2d = cross2(q2d,dq2d);
-
+% w2d = R*w1;
 end
+
+
 
 %%%% This function calculates the Inertia Matrix(J(q)),
 %%%% Coriolis(C(q,w)), Gravity(G(q)), and Input(B) vectors
@@ -225,4 +228,7 @@ Et = linspace(t0, tf, EM)';
 for s = 1:N,
 	Ex(:,s) = interp1(t(:,1), x(:,s), Et(:,1));
 end
+
 end
+
+
